@@ -17,6 +17,11 @@ use Throwable;
 class Cache implements CacheInterface
 {
     /**
+     * Characters reserved by PSR-16 for future extensions.
+     */
+    private const RESERVED_CHARACTERS = '{}()/\@:';
+
+    /**
      * @param StorageInterface $storage Storage driver, in-memory by default.
      * @param int|null $defaultTtl TTL in seconds applied when none is given, null to cache forever.
      */
@@ -238,9 +243,9 @@ class Cache implements CacheInterface
      */
     private function validateKey(string $key): void
     {
-        if (!preg_match('/^[\w\.]{1,64}$/D', $key)) {
+        if ($key === '' || strpbrk($key, self::RESERVED_CHARACTERS) !== false) {
             throw new InvalidArgumentException(
-                'Invalid key. Key must be a string of up to 64 characters containing only A-Z, a-z, 0-9, _, and .'
+                'Invalid key. Key must be a non-empty string without any of the reserved characters {}()/\@:'
             );
         }
     }
