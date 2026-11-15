@@ -106,7 +106,7 @@ $cache->deleteMultiple(['config.db', 'config.cache']);
 
 ### Key rules
 
-Keys must match `[A-Za-z0-9_.]{1,64}`. In `getMultiple()`, `setMultiple()` and `deleteMultiple()`, integer keys are accepted and cast to strings (PHP turns numeric string array keys into integers), and every key is validated before anything is written or deleted.  
+A key is any non-empty string that contains none of the characters reserved by PSR-16: `{}()/\@:`. There is no length limit. In `getMultiple()`, `setMultiple()` and `deleteMultiple()`, integer keys are accepted and cast to strings (PHP turns numeric string array keys into integers), and every key is validated before anything is written or deleted.  
 Any invalid key throws `G\SimpleCache\InvalidArgumentException` (implements `Psr\SimpleCache\InvalidArgumentException`).
 
 ---

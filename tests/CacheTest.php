@@ -325,7 +325,7 @@ final class CacheTest extends TestCase
     public function testSetMultipleWritesNothingWhenAKeyIsInvalid(): void
     {
         try {
-            $this->cache->setMultiple(['valid' => 1, 'in valid' => 2]);
+            $this->cache->setMultiple(['valid' => 1, 'in:valid' => 2]);
             $this->fail('An invalid key must be rejected.');
         } catch (PsrInvalidArgumentException) {
             $this->assertFalse($this->cache->has('valid'));
@@ -348,7 +348,7 @@ final class CacheTest extends TestCase
         $this->cache->set('valid', 1);
 
         try {
-            $this->cache->deleteMultiple(['valid', 'in valid']);
+            $this->cache->deleteMultiple(['valid', 'in:valid']);
             $this->fail('An invalid key must be rejected.');
         } catch (PsrInvalidArgumentException) {
             $this->assertTrue($this->cache->has('valid'));
@@ -371,12 +371,29 @@ final class CacheTest extends TestCase
     /**
      * @return iterable<string, array{string}>
      */
+    public static function extendedKeyProvider(): iterable
+    {
+        yield 'hyphen' => ['user-42'];
+        yield 'space' => ['a key'];
+        yield 'unicode' => ['clé_été'];
+        yield 'long' => [str_repeat('k', 300)];
+        yield 'other punctuation' => ['a|b#c=d,e;f'];
+    }
+
+    #[DataProvider('extendedKeyProvider')]
+    public function testKeysBeyondTheMinimumSetAreSupported(string $key): void
+    {
+        $this->assertTrue($this->cache->set($key, 'value'));
+        $this->assertSame('value', $this->cache->get($key));
+        $this->assertSame([$key => 'value'], $this->cache->getMultiple([$key]));
+    }
+
+    /**
+     * @return iterable<string, array{string}>
+     */
     public static function invalidKeyProvider(): iterable
     {
         yield 'empty' => [''];
-        yield 'space' => ['invalid key'];
-        yield 'trailing newline' => ["key\n"];
-        yield 'too long' => [str_repeat('k', 65)];
         foreach (['{', '}', '(', ')', '/', '\\', '@', ':'] as $reserved) {
             yield 'reserved ' . $reserved => ['key' . $reserved];
         }
