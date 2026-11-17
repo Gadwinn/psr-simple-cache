@@ -172,3 +172,7 @@ interface StorageInterface
 }
 ```
 
+
+## License
+
+MIT, see [LICENSE](LICENSE).
